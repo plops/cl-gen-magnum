@@ -187,15 +187,19 @@ is replaced with replacement."
 			 (if (! (& "MouseMoveEvent::Button::Left"
 				   (funcall event.buttons)))
 			     (return))
-			 (let ((a :ctor (- (funcall event.position)
-					   m_previous_mouse_position))
-			       (b :ctor (funcall "defaultFramebuffer.viewport().size"))
-			       (delta :type "const Vector2" :ctor (* 3s0 (/ a b))))
+			 (let ((delta :type "const Vector2" :ctor (* 3s0
+								     (/ (make-instance Vector2
+										       (- (funcall event.position)
+											  m_previous_mouse_position))
+									(make-instance Vector2
+										       (funcall "defaultFramebuffer.viewport().size"))))))
 			   
 			   (setf 
-			    m_transformation (* (funcall "Matrix4::rotationX" "Rad{delta.y()}")
+			    m_transformation (* (funcall "Matrix4::rotationX"
+							 (make-instance Rad (funcall delta.y)))
 						m_transformation
-						(funcall "Matrix4::rotationX" "Rad{delta.x()}"))
+						(funcall "Matrix4::rotationY"
+							 (make-instance Rad (funcall delta.x))))
 			    m_previous_mouse_position (funcall event.position)))
 			 
 			 (funcall event.setAccepted)

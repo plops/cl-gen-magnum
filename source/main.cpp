@@ -114,11 +114,11 @@ void MyApplication::mouseMoveEvent(MouseMoveEvent &event) {
     return;
   }
   {
-    auto a((event.position() - m_previous_mouse_position));
-    auto b(defaultFramebuffer.viewport().size());
-    const Vector2 delta(((3.e+0f) * (a / b)));
+    const Vector2 delta(
+        ((3.e+0f) * (Vector2{(event.position() - m_previous_mouse_position)} /
+                     Vector2{defaultFramebuffer.viewport().size()})));
     m_transformation = (Matrix4::rotationX(Rad{delta.y()}) * m_transformation *
-                        Matrix4::rotationX(Rad{delta.x()}));
+                        Matrix4::rotationY(Rad{delta.x()}));
     m_previous_mouse_position = event.position();
   }
   event.setAccepted();

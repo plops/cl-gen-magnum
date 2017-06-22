@@ -45,16 +45,42 @@ is replaced with replacement."
 
 
 (let ((code `(with-compilation-unit
-	       (include <fstream>)
+		 (include <fstream>)
 	       (include <iostream>)
+	       (include <Magnum/DefaultFramebuffer.h>)
+	       (include <Magnum/Platform/Sdl2Application.h>)
+
+	       (raw "using namespace Magnum;")
+
+	       (class MyApplication ("public Platform::Application")
+		      (access-specifier public)
+		      (function (MyApplication ((arguments :type "const Arguments&")) explicit))
+		      (access-specifier private)
+		      (function (drawEvent () void :specifier override)))
+
+	       
 	       
 	       ,@(dox :brief ""
 		      :usage ""
-		      :params '((initialize "")
+		      :params '((arguments "")
 				)
 		      :return "")
-	       
-	       
+
+	       ;; FIXME: I should add list initialization
+	       ;; MyApplication::MyApplication(const Arguments& arguments): Platform::Application{arguments} {
+	       ;; // TODO: Add your initialization code here
+	       ;; }
+	       (function ("MyApplication::MyApplication" ((arguments :type "const Arguments&")) nil
+							 :ctor (("Platform::Application" arguments)))
+			 (raw "// add some code")
+			 (raw ""))
+
+	       (function ("MyApplication::drawEvent" () void)
+			  (funcall defaultFramebuffer.clear
+				   "FramebufferClear::Color")
+			  (funcall swapBuffers))
+	       (funcall MAGNUM_APPLICATION_MAIN MyApplication)
+	       #+nil
 	       (function (main ((argc :type int)
 				(argv :type char**)) int)
 			 

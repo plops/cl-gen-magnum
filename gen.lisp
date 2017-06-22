@@ -53,8 +53,13 @@ is replaced with replacement."
 	       (include <Magnum/Context.h>)
 	       (include <Magnum/Version.h>)
 	       (include <Magnum/Renderer.h>)
+	       (include <Magnum/Buffer.h>)
+	       (include <Magnum/Mesh.h>)
+	       (include <Magnum/Shaders/Shaders.h>)
+	       (include <Magnum/Shaders/VertexColor.h>)
 	       (include <Magnum/Math/Color.h>)
-
+	       (include <array>)
+	       (raw "using namespace std;")
 	       (raw "using namespace Magnum;")
 	       (raw "using namespace Magnum::Math::Literals;")
 
@@ -62,8 +67,20 @@ is replaced with replacement."
 		      (access-specifier public)
 		      (function (MyApplication ((arguments :type "const Arguments&")) explicit))
 		      (access-specifier private)
-		      (function (drawEvent () void :specifier override)))
+		      (function (drawEvent () void :specifier override))
+		      (decl ((m_buffer :type Buffer)
+			     (m_mesh :type Mesh)
+			     (m_shader :type "Shaders::VertexColor2D"))))
 
+	       (struct TriangleVertex ()
+		       (decl ((position :type Vector2)
+			      (color :type Color3))))
+	       ,(let ((v '((-.5 -.5 #xff0000)
+			   (.5 -.5 #x00ff00)
+			   (.0 .5 #x0000ff))))
+		     `(decl ((data :type ,(format nil "array<TriangleVertex,~a>" (length v))
+				   :ctor (list (list ,@(loop for (x y color) in v collect
+							    `(list (list ,x ,y) ,(format nil "0x~6,'0x_srgbf" color)))))))))
 	       
 	       
 	       ,@(dox :brief ""
@@ -79,6 +96,12 @@ is replaced with replacement."
 	       (function ("MyApplication::MyApplication" ((arguments :type "const Arguments&")) nil
 							 :ctor (("Platform::Application" arguments)))
 			 (funcall "Renderer::setClearColor" (funcall "Color3::fromHsv" (raw "216.0_degf") .85s0 1s0))
+			 (funcall m_buffer.setData data "BufferUsage::StaticDraw")
+			 (raw "m_mesh.setPrimitive(MeshPrimitive::Triangles).setCount(3).addVertexBuffer(m_buffer,0,Shaders::VertexColor2D::Position{},Shaders::VertexColor2D::Color{Shaders::VertexColor2D::Color::Components::Three})")
+			 
+			 #+nil
+			 (funcall addVertexBuffer
+				  m_buffer 0 "Shaders::VertexColor2D::Position{}"  "Shaders::VertexColor2D::Color{Shaders::VertexColor2D::Color::Components::Three}")
 			 (<< (funcall Debug)
 			     (string "running on: ") (funcall "Context::current().version")
 			     (string " using ") (funcall "Context::current().rendererString")))
@@ -86,6 +109,7 @@ is replaced with replacement."
 	       (function ("MyApplication::drawEvent" () void)
 			  (funcall defaultFramebuffer.clear
 				   "FramebufferClear::Color")
+			  (funcall m_mesh.draw m_shader)
 			  (funcall swapBuffers))
 	       (funcall MAGNUM_APPLICATION_MAIN MyApplication)
 	       #+nil

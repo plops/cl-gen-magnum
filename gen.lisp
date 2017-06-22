@@ -84,7 +84,7 @@ is replaced with replacement."
 			     (m_transformation :type Matrix4)
 			     (m_projection :type Matrix4)
 
-			     (m_previousMousePosition :type Vector2i)
+			     (m_previous_mouse_position :type Vector2i)
 			     (m_color :type Color3))))
 
 	       (struct TriangleVertex ()
@@ -151,6 +151,7 @@ is replaced with replacement."
 			     (string "running on: ") (funcall "Context::current().version")
 			     (string " using ") (funcall "Context::current().rendererString")))
 
+	       
 	       (function ("MyApplication::drawEvent" () void)
 			  (funcall defaultFramebuffer.clear
 				   (|\|| "FramebufferClear::Color"
@@ -170,6 +171,36 @@ is replaced with replacement."
 			  
 			  (funcall m_mesh.draw m_shader)
 			  (funcall swapBuffers))
+
+	       (function ("MyApplication::mousePressEvent" ((event :type MouseEvent&)) void)
+			 (if (!= "MouseEvent::Button::Left" (funcall event.button))
+			     (return))
+			 (setf m_previous_mouse_position (funcall event.position))
+			 (funcall event.setAccepted))
+	       (function ("MyApplication::mouseReleaseEvent" ((event :type MouseEvent&)) void)
+			 (setf m_color (funcall "Color3::fromHsv" (+ "50.0_degf" (funcall m_color.hue))
+						1s0 1s0))
+			 (setf m_previous_mouse_position (funcall event.position))
+			 (funcall event.setAccepted)
+			 (funcall redraw))
+	       (function ("MyApplication::mouseMoveEvent" ((event :type MouseMoveEvent&)) void)
+			 (if (! (& "MouseMoveEvent::Button::Left"
+				   (funcall event.buttons)))
+			     (return))
+			 (let ((a :ctor (- (funcall event.position)
+					   m_previous_mouse_position))
+			       (b :ctor (funcall "defaultFramebuffer.viewport().size"))
+			       (delta :type "const Vector2" :ctor (* 3s0 (/ a b))))
+			   
+			   (setf 
+			    m_transformation (* (funcall "Matrix4::rotationX" "Rad{delta.y()}")
+						m_transformation
+						(funcall "Matrix4::rotationX" "Rad{delta.x()}"))
+			    m_previous_mouse_position (funcall event.position)))
+			 
+			 (funcall event.setAccepted)
+			 (funcall redraw))
+	       	       
 	       (funcall MAGNUM_APPLICATION_MAIN MyApplication)
 	       #+nil
 	       (function (main ((argc :type int)

@@ -33,7 +33,7 @@ private:
   Shaders::Phong m_shader;
   Matrix4 m_transformation;
   Matrix4 m_projection;
-  Vector2i m_previousMousePosition;
+  Vector2i m_previous_mouse_position;
   Color3 m_color;
 };
 
@@ -95,5 +95,33 @@ void MyApplication::drawEvent() {
   m_shader.setProjectionMatrix(m_projection);
   m_mesh.draw(m_shader);
   swapBuffers();
+}
+void MyApplication::mousePressEvent(MouseEvent &event) {
+  if ((MouseEvent::Button::Left != event.button())) {
+    return;
+  }
+  m_previous_mouse_position = event.position();
+  event.setAccepted();
+}
+void MyApplication::mouseReleaseEvent(MouseEvent &event) {
+  m_color = Color3::fromHsv((50.0_degf + m_color.hue()), (1.e+0f), (1.e+0f));
+  m_previous_mouse_position = event.position();
+  event.setAccepted();
+  redraw();
+}
+void MyApplication::mouseMoveEvent(MouseMoveEvent &event) {
+  if ((!((MouseMoveEvent::Button::Left & event.buttons())))) {
+    return;
+  }
+  {
+    auto a((event.position() - m_previous_mouse_position));
+    auto b(defaultFramebuffer.viewport().size());
+    const Vector2 delta(((3.e+0f) * (a / b)));
+    m_transformation = (Matrix4::rotationX(Rad{delta.y()}) * m_transformation *
+                        Matrix4::rotationX(Rad{delta.x()}));
+    m_previous_mouse_position = event.position();
+  }
+  event.setAccepted();
+  redraw();
 }
 MAGNUM_APPLICATION_MAIN(MyApplication)

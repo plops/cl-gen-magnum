@@ -18,6 +18,7 @@
 					    (t e))) "std::endl")))
 
 
+
 (defun replace-all (string part replacement &key (test #'char=))
 "Returns a new string in which all the occurences of the part 
 is replaced with replacement."
@@ -49,8 +50,13 @@ is replaced with replacement."
 	       (include <iostream>)
 	       (include <Magnum/DefaultFramebuffer.h>)
 	       (include <Magnum/Platform/Sdl2Application.h>)
+	       (include <Magnum/Context.h>)
+	       (include <Magnum/Version.h>)
+	       (include <Magnum/Renderer.h>)
+	       (include <Magnum/Math/Color.h>)
 
 	       (raw "using namespace Magnum;")
+	       (raw "using namespace Magnum::Math::Literals;")
 
 	       (class MyApplication ("public Platform::Application")
 		      (access-specifier public)
@@ -72,8 +78,10 @@ is replaced with replacement."
 	       ;; }
 	       (function ("MyApplication::MyApplication" ((arguments :type "const Arguments&")) nil
 							 :ctor (("Platform::Application" arguments)))
-			 (raw "// add some code")
-			 (raw ""))
+			 (funcall "Renderer::setClearColor" (funcall "Color3::fromHsv" (raw "216.0_degf") .85s0 1s0))
+			 (<< (funcall Debug)
+			     (string "running on: ") (funcall "Context::current().version")
+			     (string " using ") (funcall "Context::current().rendererString")))
 
 	       (function ("MyApplication::drawEvent" () void)
 			  (funcall defaultFramebuffer.clear

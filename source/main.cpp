@@ -45,11 +45,11 @@ MyApplication::MyApplication(const Arguments &arguments)
     : Platform::Application(arguments) {
   Renderer::setClearColor(Color3::fromHsv(216.0_degf, (8.5e-1f), (1.e+0f)));
   m_buffer.setData(data, BufferUsage::StaticDraw);
-  m_mesh.setPrimitive(MeshPrimitive::Triangles)
-      .setCount(3)
-      .addVertexBuffer(m_buffer, 0, Shaders::VertexColor2D::Position{},
-                       Shaders::VertexColor2D::Color{
-                           Shaders::VertexColor2D::Color::Components::Three});
+  m_mesh.setPrimitive(MeshPrimitive::Triangles);
+  m_mesh.setCount(3);
+  m_mesh.addVertexBuffer(m_buffer, 0, Shaders::VertexColor2D::Position{},
+                         Shaders::VertexColor2D::Color{
+                             Shaders::VertexColor2D::Color::Components::Three});
   (Debug() << "running on: " << Context::current().version() << " using "
            << Context::current().rendererString());
 }

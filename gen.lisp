@@ -97,6 +97,13 @@ is replaced with replacement."
 							 :ctor (("Platform::Application" arguments)))
 			 (funcall "Renderer::setClearColor" (funcall "Color3::fromHsv" (raw "216.0_degf") .85s0 1s0))
 			 (funcall m_buffer.setData data "BufferUsage::StaticDraw")
+
+			 ,@(loop for (e f) in `((setPrimitive ("MeshPrimitive::Triangles"))
+						(setCount (3))
+						(addVertexBuffer (m_buffer 0 "Shaders::VertexColor2D::Position{}" "Shaders::VertexColor2D::Color{Shaders::VertexColor2D::Color::Components::Three}")))
+			      collect
+				`(funcall (slot-value m_mesh ,e) ,@f))
+			 #+nil
 			 (raw "m_mesh.setPrimitive(MeshPrimitive::Triangles).setCount(3).addVertexBuffer(m_buffer,0,Shaders::VertexColor2D::Position{},Shaders::VertexColor2D::Color{Shaders::VertexColor2D::Color::Components::Three})")
 			 
 			 #+nil
